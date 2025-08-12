@@ -34,8 +34,19 @@
   <div id="timer">Iklan berakhir dalam 15 detik</div>
   <div id="giga-hub-ad"></div>
 
-  <script src="https://ad.gigapub.tech/script?id=1512"></script>
+  <script src="https://ad.gigapub.tech/script?id=1511"></script>
   <script>
+    // Panggil iklan via API
+    window.showGiga()
+      .then(() => {
+        // Reward logic setelah iklan selesai
+        window.location.href = "https://google.com"; // ganti link sesuai kebutuhan
+      })
+      .catch(e => {
+        console.error("Gagal menampilkan iklan:", e);
+      });
+
+    // Timer mundur selama iklan tampil
     let timeLeft = 15; // lama iklan dalam detik
     const timerEl = document.getElementById("timer");
 
@@ -45,7 +56,6 @@
       if (timeLeft <= 0) {
         clearInterval(countdown);
         timerEl.textContent = "Iklan selesai";
-        window.location.href = "https://google.com"; // ganti link sesuai kebutuhan
       }
     }, 1000);
   </script>
