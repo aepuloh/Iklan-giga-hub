@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Iklan Giga Hub</title>
   <style>
     html, body {
@@ -10,12 +10,16 @@
       padding: 0;
       height: 100%;
       width: 100%;
-      background: #fff;
+      background: #000;
       font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
     #timer {
       position: fixed;
-      top: 10px;
+      top: env(safe-area-inset-top, 10px);
       right: 10px;
       background: rgba(0,0,0,0.7);
       color: #fff;
@@ -25,39 +29,97 @@
       z-index: 9999;
     }
     #giga-hub-ad {
-      height: 100%;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       width: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    #claimBtn {
+      width: 90%;
+      max-width: 400px;
+      margin: 15px auto;
+      padding: 12px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 6px;
+      background: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+    #claimBtn:disabled {
+      background: gray;
+      cursor: not-allowed;
     }
   </style>
 </head>
 <body>
-  <div id="timer">Iklan berakhir dalam 15 detik</div>
-  <div id="giga-hub-ad"></div>
 
+<div id="timer">00:10</div>
+
+<!-- Container iklan -->
+<div id="giga-hub-ad">
   <script src="https://ad.gigapub.tech/script?id=1511"></script>
-  <script>
-    // Panggil iklan via API
-    window.showGiga()
-      .then(() => {
-        // Reward logic setelah iklan selesai
-        window.location.href = "https://google.com"; // ganti link sesuai kebutuhan
-      })
-      .catch(e => {
-        console.error("Gagal menampilkan iklan:", e);
+</div>
+
+<!-- Tombol klaim -->
+<button id="claimBtn" disabled>Klaim Poin</button>
+
+<!-- Telegram WebApp SDK -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+  const tg = window.Telegram.WebApp;
+  tg.expand();
+
+  // Fungsi parse initData
+  function parseInitData(str) {
+    if (!str) return {};
+    const obj = {};
+    str.split('&').forEach(pair => {
+      const [k, v] = pair.split('=');
+      obj[k] = decodeURIComponent(v);
+    });
+    if (obj.user) {
+      try { obj.user = JSON.parse(obj.user); } catch {}
+    }
+    return obj;
+  }
+  const initDataObj = parseInitData(tg.initData);
+
+  // Timer mundur
+  let waktu = 10; // detik
+  const timerEl = document.getElementById('timer');
+  const interval = setInterval(() => {
+    waktu--;
+    timerEl.textContent = `00:${waktu.toString().padStart(2, '0')}`;
+    if (waktu <= 0) {
+      clearInterval(interval);
+      document.getElementById('claimBtn').disabled = false;
+    }
+  }, 1000);
+
+  // Event tombol klaim
+  document.getElementById('claimBtn').addEventListener('click', async () => {
+    try {
+      const resp = await fetch('https://aa239759-8a8b-4648-b4d8-b5ba08b9cdf0-00-3om7x2u4jam6.sisko.replit.dev/claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ initData: initDataObj, reward: 10 })
       });
-
-    // Timer mundur selama iklan tampil
-    let timeLeft = 15; // lama iklan dalam detik
-    const timerEl = document.getElementById("timer");
-
-    const countdown = setInterval(() => {
-      timeLeft--;
-      timerEl.textContent = `Iklan berakhir dalam ${timeLeft} detik`;
-      if (timeLeft <= 0) {
-        clearInterval(countdown);
-        timerEl.textContent = "Iklan selesai";
+      const data = await resp.json();
+      if (data.success) {
+        alert(`Poin kamu sekarang: ${data.points}`);
+        tg.close();
+      } else {
+        alert('Gagal klaim: ' + (data.error || 'Tidak diketahui'));
       }
-    }, 1000);
-  </script>
+    } catch (err) {
+      alert('Error: ' + err.message);
+    }
+  });
+</script>
+
 </body>
 </html>
