@@ -3,44 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Iklan Full Screen Giga Hub</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background: rgba(0,0,0,0.8);
-    }
-    #ad-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    }
-  </style>
+  <title>Iklan Giga Hub</title>
 </head>
 <body>
 
-<div id="ad-container">
-  <script src="https://ad.gigapub.tech/script?id=1511"></script>
-</div>
-
+<script src="https://ad.gigapub.tech/script?id=1511"></script>
 <script>
-  // Pantau iklan, jika elemen #ad-container kosong, anggap iklan selesai
-  const observer = new MutationObserver(() => {
-    const adContent = document.getElementById("ad-container").innerHTML.trim();
-    if (!adContent) {
-      window.location.href = "https://www.google.com"; // ganti ke tujuan
-    }
-  });
-
-  observer.observe(document.getElementById("ad-container"), { childList: true, subtree: true });
+  // Jalankan iklan langsung saat halaman terbuka
+  window.showGiga()
+    .then(() => {
+      // Iklan selesai → redirect
+      window.location.href = "https://www.google.com"; // Ganti URL tujuan
+    })
+    .catch(e => {
+      console.error("Iklan gagal tampil:", e);
+      // Kalau gagal → langsung redirect
+      window.location.href = "https://www.google.com";
+    });
 </script>
 
 </body>
